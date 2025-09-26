@@ -1,0 +1,48 @@
+<html data-theme="dark">
+<head>
+  <title>YASE</title>
+  <!-- pico -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" type="text/css" href="static/style.css" />
+  <script src="/static/rollup.js"></script>
+</head>
+<body>
+  <main>
+  <header>
+    <h1>YASE! <span>Yet Another<br />STL Editor</span></h1>
+  </header>
+  <section id="left_pane">
+    <menu>
+      <div role="group">
+        <button class="left btn secondary" data-target="#attr_pane">Attributes</button>
+        <button class="left btn" id="code_btn" data-target="#code_pane">Config</button>
+        <button class="left btn secondary" data-target="#log_pane">Logs</button>
+      </div>
+      <button class="contrast" id="render_btn">Render</button>
+    </menu>
+    
+    <div class="left pane" id="attr_pane">
+      <p class="no_attributes">No attributes specified.</p>
+      <ul></ul>
+    </div>
+    <div class="left pane" id="code_pane">
+      <div id="editor"></div>
+      <pre style="display: none;"></pre>
+    </div>
+    <div class="left pane" id="log_pane"><ul></ul></div>
+  </section>
+  <section id="right_pane">
+    <menu>
+        <select id="stl_select">
+          <option data-placeholder="true">Cube</option>
+        </select>
+        <button>Save</button>
+        <button class="secondary">Save All</button>
+    </menu>
+
+    <div id="preview"></div>
+  </section>
+  <div id="toast_panel"></div>
+  </main>
+</body>
+</html>

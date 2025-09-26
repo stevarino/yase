@@ -1,0 +1,12 @@
+blinker==1.9.0
+click==8.2.1
+Flask==3.1.2
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.2
+numpy==2.3.2
+numpy-stl==3.2.0
+python-utils==3.9.1
+PyYAML==6.0.2
+typing_extensions==4.15.0
+Werkzeug==3.1.3

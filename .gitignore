@@ -1,0 +1,6 @@
+*.yaml
+*.yml
+frontend/node_modules
+frontend/build
+env
+**/__pycache__

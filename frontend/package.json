@@ -1,0 +1,32 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && npm exec rollup -- -c rollup.config.js"
+  },
+  "author": "",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.18.7",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-yaml": "^6.1.2",
+    "@codemirror/search": "^6.5.11",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.2",
+    "@fsegurai/codemirror-theme-bundle": "^6.2.2",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/codemirror": "^5.60.16",
+    "@types/three": "^0.179.0",
+    "@webgpu/types": "^0.1.65",
+    "@zip.js/zip.js": "^2.8.2",
+    "codemirror": "^6.0.2",
+    "npm": "^11.6.0",
+    "rollup": "^4.50.2",
+    "three": "^0.180.0",
+    "typescript": "^5.9.2"
+  }
+}
