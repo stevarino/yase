@@ -1,6 +1,7 @@
-from stl import mesh, Mesh
 from dataclasses import dataclass
-import numpy as np
+from itertools import chain
+
+import trimesh as tm
 
 @dataclass
 class Volume:
@@ -56,34 +57,33 @@ class Volume:
 
 
 class Shape:
-  def __init__(self, mesh: Mesh):
+  def __init__(self, mesh: tm.Trimesh):
      self.mesh = mesh
 
   @classmethod
   def load(cls, filename: str):
-     return Shape(mesh.Mesh.from_file(filename))
+    return Shape(tm.load_mesh(filename))
   
   def save(self, filename: str, fh=None):
-     self.mesh.save(filename, fh=fh)
-  
+    # trimesh does not support filenames in STL headers
+    self.mesh.export(fh or filename, file_type='stl')
+
   @property
   def volume(self):
-     return Volume(
-        self.mesh.x.min(), self.mesh.x.max(),
-        self.mesh.y.min(), self.mesh.y.max(),
-        self.mesh.z.min(), self.mesh.z.max(),
-     )
+    bbox: tm.primitives.Box = self.mesh.bounding_box
+    # bbox.bounds of np.float64: 
+    #   [[x_min, y_min, z_min], [x_max, y_max, z_max]]
+    return Volume(
+      *(float(n) for n in chain(*zip(*bbox.bounds)))
+    )
 
   def copy(self):
-     return Shape(mesh.Mesh(self.mesh.data.copy()))
+     return Shape(self.mesh.copy())
 
   def zero(self):
      """Moves the min x/y/z points to zero."""
-     self.translate(
-        -1 * self.mesh.x.min(),
-        -1 * self.mesh.y.min(),
-        -1 * self.mesh.z.min(),
-     )
+     bbox: tm.primitives.Box = self.mesh.bounding_box
+     self.mesh.apply_translation(-1 * bbox.bounds[0])
 
   def center(self, x, y, z):
      v = self.volume
@@ -95,10 +95,10 @@ class Shape:
 
   def translate(self, dx: float, dy: float, dz: float):
      """Applies a constant offset the x/y/z points."""
-     self.mesh.points[:] += 3 * [dx, dy, dz]
+     self.mesh.apply_translation([dx, dy, dz])
 
   def scale(self, x, y, z):
-     self.mesh.points[:] *= 3 * [x, y, z]
+     self.mesh.apply_scale([x, y, z])
 
   def set_width(self, width: float):
      x = float(width) / self.volume.width
@@ -118,9 +118,9 @@ class Shape:
     y = float(height) / vol.height
     z = float(depth) / vol.depth
     self.scale(x, y, z)
-     
 
   def merge(self, other: 'Shape'):
-    self.mesh = mesh.Mesh(np.concatenate([
-       self.mesh.data, other.mesh.data
-    ]))
+    self.mesh = tm.boolean.union([self.mesh, other.mesh], engine='manifold')
+
+  def subtract(self, other: 'Shape'):
+    self.mesh = tm.boolean.difference([self.mesh, other.mesh], engine='manifold')

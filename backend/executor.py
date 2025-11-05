@@ -294,6 +294,11 @@ async def load(filename: str, ctx: Context):
   ctx.other.zero()
 
 
+@executor.wrap(expected=val.any_)
+async def invert(_: any, ctx: Context):
+  ctx.other.invert()
+
+
 @executor.wrap(expected=val.numeric)
 async def rotate_x(degrees: float, ctx: Context):
   """Rotates around the x axis in degrees"""
@@ -406,15 +411,20 @@ async def save_as(filename: str, ctx: Context):
   await ctx.save(filename.format(*ctx.args, **ctx.kwargs_with_args))
 
 
+def _normalize_configs(configs: list[dict]|dict):
+  if type(configs) == dict:
+    configs = [configs]
+  if type(configs) != list:
+    raise ValueError(f"Expected list or dict, got {type(configs)}")
+  return configs
+
+
 @executor.wrap(expected=val.commands)
 async def branch(configs: list[dict], ctx: Context):
   """
   Specify parellel execution paths, each with their own copy of the context.
   """
-  if type(configs) == dict:
-    configs = [configs]
-  if type(configs) != list:
-    raise ValueError(f"Expected list or dict, got {type(configs)}")
+  configs = _normalize_configs(configs)
   for i, cfg in enumerate(configs):
     cpy = ctx.copy()
     cpy.path.append(f'{i}')
@@ -426,12 +436,24 @@ async def then(configs: list[dict]|dict, ctx: Context):
   """
   Specify parellel execution paths, with mutations carrying between them.
   """
-  if type(configs) == dict:
-    configs = [configs]
-  if type(configs) != list:
-    raise ValueError(f"Expected list or dict, got {type(configs)}")
+  configs = _normalize_configs(configs)
   for i, cfg in enumerate(configs):
     ctx.path.append(f'{i}')
     await ctx.process(cfg)
     ctx.path.pop()
 
+@executor.wrap(name='with', expected=val.commands)
+async def with_(configs: list[dict]|dict, ctx: Context):
+  """
+  Starts a new primary shape, and upon exiting the block, switches the
+  primary to the secondary.
+  """
+  configs = _normalize_configs(configs)
+  cpy = ctx.copy()
+  cpy.shape = None
+  cpy.other = None
+  for i, cfg in enumerate(configs):
+    cpy.path.append(f'{i}')
+    await cpy.process(cfg)
+    cpy.path.pop()
+  ctx.other = cpy.shape
